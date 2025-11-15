@@ -36,4 +36,10 @@ interface LinkDao {
 
     @Query("SELECT * FROM links WHERE id = :linkId")
     suspend fun getLinkById(linkId: Long): Link?
+
+    @Query("SELECT * FROM links WHERE url = :url LIMIT 1")
+    suspend fun getLinkByUrl(url: String): Link?
+
+    @Query("SELECT EXISTS(SELECT 1 FROM links WHERE url = :url)")
+    suspend fun isUrlSaved(url: String): Boolean
 }

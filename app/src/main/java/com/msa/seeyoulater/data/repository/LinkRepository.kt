@@ -12,6 +12,8 @@ interface LinkRepository {
     fun getAllLinksSortedByLastOpened(): Flow<List<Link>>
     fun getStarredLinksSortedByLastOpened(): Flow<List<Link>>
     suspend fun getLinkById(id: Long): Link?
+    suspend fun getLinkByUrl(url: String): Link?
+    suspend fun isUrlSaved(url: String): Boolean
     suspend fun saveLink(url: String, title: String?): Long
     suspend fun updateLink(link: Link)
     suspend fun toggleStarStatus(linkId: Long)

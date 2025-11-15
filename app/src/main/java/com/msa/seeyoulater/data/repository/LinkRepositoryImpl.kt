@@ -29,6 +29,8 @@ class LinkRepositoryImpl(
     override fun getAllLinksSortedByLastOpened(): Flow<List<Link>> = linkDao.getAllLinksSortedByLastOpened()
     override fun getStarredLinksSortedByLastOpened(): Flow<List<Link>> = linkDao.getStarredLinksSortedByLastOpened()
     override suspend fun getLinkById(id: Long): Link? = linkDao.getLinkById(id)
+    override suspend fun getLinkByUrl(url: String): Link? = linkDao.getLinkByUrl(url)
+    override suspend fun isUrlSaved(url: String): Boolean = linkDao.isUrlSaved(url)
 
     override suspend fun saveLink(url: String, title: String?): Long {
         val link = Link(url = url, title = title?.takeIf { it.isNotBlank() })
