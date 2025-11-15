@@ -55,6 +55,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.io.coil.kt.coil.compose)
 
+    // DataStore Preferences
+    implementation(libs.androidx.datastore.preferences)
+
     // Room Database API.
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

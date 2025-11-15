@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.msa.seeyoulater.data.local.database.LinkDatabase
+import com.msa.seeyoulater.data.preferences.ThemePreferencesRepository
 import com.msa.seeyoulater.data.repository.LinkRepository
 import com.msa.seeyoulater.data.repository.LinkRepositoryImpl
 import com.msa.seeyoulater.ui.screens.main.MainViewModel
@@ -25,6 +26,11 @@ class LinkManagerApp : Application() {
     // Repository instance (lazy initialization, depends on database and scope)
     val repository: LinkRepository by lazy { LinkRepositoryImpl(database.linkDao(), applicationScope) }
 
+    // Theme preferences repository
+    val themePreferencesRepository: ThemePreferencesRepository by lazy {
+        ThemePreferencesRepository(this)
+    }
+
      // Simple ViewModel Factory (replace with Hilt/Dagger in a real app)
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val viewModelFactory: ViewModelProvider.Factory by lazy {
@@ -35,7 +41,7 @@ class LinkManagerApp : Application() {
                         MainViewModel(repository) as T
                     }
                      modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
-                        SettingsViewModel(repository) as T
+                        SettingsViewModel(repository, themePreferencesRepository) as T
                     }
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }

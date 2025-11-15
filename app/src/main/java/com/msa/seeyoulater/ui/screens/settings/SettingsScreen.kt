@@ -15,7 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color // Added import for Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.msa.seeyoulater.R
+import com.msa.seeyoulater.ui.components.ThemeSelectionDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,12 +27,18 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
+    var showThemeSelectionDialog by remember { mutableStateOf(false) }
+
+    // Collect theme settings from ViewModel
+    val themeSettings by viewModel.themeSettings.collectAsState()
+
     // Example state holders for settings (replace with actual persisted state later)
     var urlPreviewEnabled by remember { mutableStateOf(true) }
      // In a real app, load/save these from DataStore or SharedPreferences via ViewModel
     // val urlPreviewEnabled by viewModel.previewEnabled.collectAsState()
 
 
+    // Clear confirmation dialog
     if (showClearConfirmationDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmationDialog = false },
@@ -53,6 +62,22 @@ fun SettingsScreen(
                 }
             }
         )
+    }
+
+    // Theme selection dialog
+    if (showThemeSelectionDialog) {
+        Dialog(
+            onDismissRequest = { showThemeSelectionDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            ThemeSelectionDialog(
+                currentSettings = themeSettings,
+                onSettingsChanged = { newSettings ->
+                    viewModel.updateThemeSettings(newSettings)
+                },
+                onDismiss = { showThemeSelectionDialog = false }
+            )
+        }
     }
 
     Scaffold(
@@ -91,12 +116,12 @@ fun SettingsScreen(
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-             // --- Theme Setting (Example - Needs proper implementation) ---
+             // --- Theme Setting ---
              SettingItem(
                  icon = Icons.Default.Palette,
                  title = stringResource(R.string.settings_theme),
-                 description = "Current: System Default", // Replace with actual theme state
-                 onClick = { /* TODO: Show theme selection dialog/navigate */ }
+                 description = "Color: ${themeSettings.colorScheme.displayName()} • Mode: ${themeSettings.themeMode.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                 onClick = { showThemeSelectionDialog = true }
              )
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))
