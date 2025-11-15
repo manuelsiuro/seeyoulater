@@ -122,6 +122,10 @@ fun LinkDetailScreen(
                     ) {
                         Icon(Icons.Default.Share, "Share link")
                     }
+                    // Refresh Preview
+                    IconButton(onClick = { viewModel.refreshPreview() }) {
+                        Icon(Icons.Default.Refresh, "Refresh preview")
+                    }
                     // Delete
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(

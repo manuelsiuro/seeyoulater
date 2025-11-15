@@ -170,6 +170,19 @@ class LinkDetailViewModel(
         }
     }
 
+    fun refreshPreview() {
+        viewModelScope.launch {
+            try {
+                repository.fetchAndUpdateLinkPreview(linkId)
+            } catch (e: Exception) {
+                Log.e("LinkDetailViewModel", "Error refreshing preview", e)
+                _state.update {
+                    it.copy(error = "Failed to refresh preview")
+                }
+            }
+        }
+    }
+
     fun deleteLink(onDeleteComplete: () -> Unit) {
         viewModelScope.launch {
             try {

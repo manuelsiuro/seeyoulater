@@ -510,6 +510,9 @@ fun MainScreen(
             onToggleArchive = {
                 viewModel.toggleArchive(link.id)
             },
+            onRefreshPreview = {
+                viewModel.refreshPreview(link.id)
+            },
             onDeleteLink = {
                 viewModel.deleteLink(link)
             }

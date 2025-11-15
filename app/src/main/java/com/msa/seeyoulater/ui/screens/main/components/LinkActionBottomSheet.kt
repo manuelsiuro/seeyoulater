@@ -32,6 +32,7 @@ fun LinkActionBottomSheet(
     onToggleRead: () -> Unit,
     onToggleStar: () -> Unit,
     onToggleArchive: () -> Unit,
+    onRefreshPreview: () -> Unit,
     onDeleteLink: () -> Unit
 ) {
     ModalBottomSheet(
@@ -150,6 +151,16 @@ fun LinkActionBottomSheet(
                 subtitle = if (link.isArchived) "Move back to active links" else "Move to archive",
                 onClick = {
                     onToggleArchive()
+                    onDismiss()
+                }
+            )
+
+            ActionItem(
+                icon = Icons.Default.Refresh,
+                title = "Refresh Preview",
+                subtitle = "Update title, description, and images",
+                onClick = {
+                    onRefreshPreview()
                     onDismiss()
                 }
             )

@@ -231,6 +231,17 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
         }
     }
 
+    fun refreshPreview(linkId: Long) {
+        viewModelScope.launch {
+            try {
+                repository.fetchAndUpdateLinkPreview(linkId)
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error refreshing preview for $linkId", e)
+                _state.update { it.copy(error = "Failed to refresh preview.") }
+            }
+        }
+    }
+
      fun markAsOpened(linkId: Long) {
         viewModelScope.launch {
              try {
