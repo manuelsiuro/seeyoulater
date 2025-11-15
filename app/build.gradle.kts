@@ -58,6 +58,9 @@ dependencies {
     // DataStore Preferences
     implementation(libs.androidx.datastore.preferences)
 
+    // Gson for JSON serialization
+    implementation(libs.com.google.code.gson.gson)
+
     // Room Database API.
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
