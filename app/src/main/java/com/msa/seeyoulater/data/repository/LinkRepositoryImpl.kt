@@ -9,6 +9,7 @@ import com.msa.seeyoulater.data.local.dao.CollectionDao
 import com.msa.seeyoulater.data.local.entity.Link
 import com.msa.seeyoulater.data.local.entity.Tag
 import com.msa.seeyoulater.data.local.entity.Collection
+import com.msa.seeyoulater.data.preferences.AppPreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ class LinkRepositoryImpl(
     private val linkDao: LinkDao,
     private val tagDao: TagDao,
     private val collectionDao: CollectionDao,
+    private val appPreferencesRepository: AppPreferencesRepository,
     private val externalScope: CoroutineScope // For long running background tasks like preview fetching
 ) : LinkRepository {
 
@@ -37,10 +39,13 @@ class LinkRepositoryImpl(
     override suspend fun saveLink(url: String, title: String?): Long {
         val link = Link(url = url, title = title?.takeIf { it.isNotBlank() })
         val newId = linkDao.insertLink(link)
-        // Trigger preview fetching in the background without blocking the save operation
+        // Trigger preview fetching in the background only if enabled
         if (newId > 0) {
             externalScope.launch {
-                fetchAndUpdateLinkPreview(newId)
+                val isPreviewEnabled = appPreferencesRepository.urlPreviewEnabled.first()
+                if (isPreviewEnabled) {
+                    fetchAndUpdateLinkPreview(newId)
+                }
             }
         }
         return newId

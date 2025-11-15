@@ -27,14 +27,9 @@ class LinkManagerApp : Application() {
     // Database instance (lazy initialization)
     val database: LinkDatabase by lazy { LinkDatabase.getDatabase(this) }
 
-    // Repository instance (lazy initialization, depends on database and scope)
-    val repository: LinkRepository by lazy {
-        LinkRepositoryImpl(
-            linkDao = database.linkDao(),
-            tagDao = database.tagDao(),
-            collectionDao = database.collectionDao(),
-            externalScope = applicationScope
-        )
+    // App preferences repository (initialized early as it's needed by repository)
+    val appPreferencesRepository: AppPreferencesRepository by lazy {
+        AppPreferencesRepository(this)
     }
 
     // Theme preferences repository
@@ -42,9 +37,15 @@ class LinkManagerApp : Application() {
         ThemePreferencesRepository(this)
     }
 
-    // App preferences repository
-    val appPreferencesRepository: AppPreferencesRepository by lazy {
-        AppPreferencesRepository(this)
+    // Repository instance (lazy initialization, depends on database, preferences, and scope)
+    val repository: LinkRepository by lazy {
+        LinkRepositoryImpl(
+            linkDao = database.linkDao(),
+            tagDao = database.tagDao(),
+            collectionDao = database.collectionDao(),
+            appPreferencesRepository = appPreferencesRepository,
+            externalScope = applicationScope
+        )
     }
 
      // Simple ViewModel Factory (replace with Hilt/Dagger in a real app)
