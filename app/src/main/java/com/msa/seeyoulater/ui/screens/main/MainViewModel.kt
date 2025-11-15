@@ -32,10 +32,6 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
     private val _state = MutableStateFlow(MainScreenState())
     val state: StateFlow<MainScreenState> = _state.asStateFlow()
 
-    // StateFlow for search query with debounce
-    private val _searchQuery = MutableStateFlow("")
-     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
     // StateFlows for sorting and filtering
     private val _sortOption = MutableStateFlow(SortOption.DATE_ADDED)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
@@ -52,7 +48,7 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
         viewModelScope.launch {
             // Combine flows for search, sort, and filter
              combine(
-                _searchQuery.debounce(300), // Apply debounce to search query
+                _state.map { it.searchQuery }.debounce(300), // Apply debounce to search query from state
                 _sortOption,
                 _filterOption
             ) { query, sort, filter ->
@@ -72,7 +68,7 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
                         links = links,
                         isLoading = false,
                         error = null,
-                        searchQuery = _searchQuery.value, // Reflect current search/filter state
+                        // searchQuery is already in state, no need to update it here
                         sortOption = _sortOption.value,
                         filterOption = _filterOption.value
                     )
@@ -107,7 +103,7 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
     }
 
     fun onSearchQueryChanged(query: String) {
-        _searchQuery.value = query
+        _state.update { it.copy(searchQuery = query) }
     }
 
     fun onSortChanged(option: SortOption) {
