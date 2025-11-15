@@ -14,5 +14,11 @@ data class Link(
     val addedTimestamp: Long = System.currentTimeMillis(),
     var isStarred: Boolean = false,
     var isOpened: Boolean = false,
-    var lastOpenedTimestamp: Long? = null
+    var lastOpenedTimestamp: Long? = null,
+
+    // Reader Mode fields
+    var savedContent: String? = null, // Full article content in HTML
+    var contentSavedTimestamp: Long? = null, // When content was saved
+    var readingProgress: Float = 0f, // Reading progress (0.0 to 1.0)
+    var estimatedReadingTime: Int? = null // Estimated reading time in minutes
 )

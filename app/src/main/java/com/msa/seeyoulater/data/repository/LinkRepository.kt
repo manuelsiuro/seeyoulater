@@ -47,4 +47,9 @@ interface LinkRepository {
     suspend fun removeLinkFromCollection(linkId: Long, collectionId: Long)
     suspend fun updateLinkSortOrderInCollection(linkId: Long, collectionId: Long, sortOrder: Int)
     suspend fun isLinkInCollection(linkId: Long, collectionId: Long): Boolean
+
+    // ==================== Reader Mode Operations ====================
+    suspend fun saveArticleContent(linkId: Long, content: String, estimatedReadingTime: Int)
+    suspend fun updateReadingProgress(linkId: Long, progress: Float)
+    suspend fun hasArticleContent(linkId: Long): Boolean
 }

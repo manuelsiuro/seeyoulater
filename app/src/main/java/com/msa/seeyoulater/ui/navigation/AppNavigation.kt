@@ -18,6 +18,8 @@ import com.msa.seeyoulater.ui.screens.collections.CollectionsViewModel
 import com.msa.seeyoulater.ui.screens.tags.TagsScreen
 import com.msa.seeyoulater.ui.screens.tags.TagsViewModel
 import com.msa.seeyoulater.ui.screens.splash.SplashScreen
+import com.msa.seeyoulater.ui.screens.reader.ReaderScreen
+import com.msa.seeyoulater.ui.screens.reader.ReaderViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -81,6 +83,25 @@ fun AppNavigation(navController: NavHostController) {
             )
             LinkDetailScreen(
                 viewModel = detailViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToReader = { linkId ->
+                    navController.navigate(Screen.Reader.createRoute(linkId))
+                }
+            )
+        }
+        composable(
+            route = Screen.Reader.route,
+            arguments = listOf(
+                navArgument("linkId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val linkId = backStackEntry.arguments?.getLong("linkId") ?: return@composable
+            val readerViewModel = ReaderViewModel(
+                repository = (navController.context.applicationContext as LinkManagerApp).repository,
+                linkId = linkId
+            )
+            ReaderScreen(
+                viewModel = readerViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

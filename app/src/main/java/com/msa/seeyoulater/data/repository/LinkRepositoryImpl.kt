@@ -258,4 +258,29 @@ class LinkRepositoryImpl(
     override suspend fun isLinkInCollection(linkId: Long, collectionId: Long): Boolean {
         return collectionDao.isLinkInCollection(linkId, collectionId)
     }
+
+    // ==================== Reader Mode Operations ====================
+
+    override suspend fun saveArticleContent(linkId: Long, content: String, estimatedReadingTime: Int) {
+        val link = linkDao.getLinkById(linkId)
+        link?.let {
+            it.savedContent = content
+            it.contentSavedTimestamp = System.currentTimeMillis()
+            it.estimatedReadingTime = estimatedReadingTime
+            linkDao.updateLink(it)
+        }
+    }
+
+    override suspend fun updateReadingProgress(linkId: Long, progress: Float) {
+        val link = linkDao.getLinkById(linkId)
+        link?.let {
+            it.readingProgress = progress
+            linkDao.updateLink(it)
+        }
+    }
+
+    override suspend fun hasArticleContent(linkId: Long): Boolean {
+        val link = linkDao.getLinkById(linkId)
+        return link?.savedContent != null
+    }
 }

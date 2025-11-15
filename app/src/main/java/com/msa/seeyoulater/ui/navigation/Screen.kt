@@ -9,4 +9,7 @@ sealed class Screen(val route: String) {
     object Detail : Screen("detail/{linkId}") {
         fun createRoute(linkId: Long) = "detail/$linkId"
     }
+    object Reader : Screen("reader/{linkId}") {
+        fun createRoute(linkId: Long) = "reader/$linkId"
+    }
 }

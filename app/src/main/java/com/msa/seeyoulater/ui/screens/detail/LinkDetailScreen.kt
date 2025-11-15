@@ -36,7 +36,8 @@ import java.util.*
 @Composable
 fun LinkDetailScreen(
     viewModel: LinkDetailViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToReader: ((Long) -> Unit)? = null
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -137,44 +138,65 @@ fun LinkDetailScreen(
             )
         },
         bottomBar = {
-            // Save and Open buttons
+            // Read, Open, and Save buttons
             state.link?.let { link ->
                 Surface(
                     tonalElevation = 3.dp,
                     shadowElevation = 3.dp
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedButton(
-                            onClick = { openLinkInBrowser(context, link.url) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.OpenInBrowser, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Open in Browser")
-                        }
-                        Button(
-                            onClick = {
-                                viewModel.saveChanges(onSaveComplete = onNavigateBack)
-                            },
-                            modifier = Modifier.weight(1f),
-                            enabled = !state.isSaving
-                        ) {
-                            if (state.isSaving) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onPrimary
+                        // Reader Mode button (full width)
+                        if (onNavigateToReader != null) {
+                            Button(
+                                onClick = { onNavigateToReader(link.id) },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
-                            } else {
-                                Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                            ) {
+                                Icon(Icons.Default.Article, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Read Article")
                             }
-                            Spacer(Modifier.width(8.dp))
-                            Text("Save")
+                        }
+                        // Open and Save buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { openLinkInBrowser(context, link.url) },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.OpenInBrowser, null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Open")
+                            }
+                            Button(
+                                onClick = {
+                                    viewModel.saveChanges(onSaveComplete = onNavigateBack)
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = !state.isSaving
+                            ) {
+                                if (state.isSaving) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                } else {
+                                    Icon(Icons.Default.Save, null, modifier = Modifier.size(18.dp))
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                Text("Save")
+                            }
                         }
                     }
                 }
