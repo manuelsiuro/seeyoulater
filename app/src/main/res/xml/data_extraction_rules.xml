@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+         <!-- Disable cloud backup for simplicity, especially as API keys aren't handled securely -->
+         <exclude domain="database" path="ai_persistence_db.db"/>
+         <exclude domain="sharedpref"/>
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="ai_persistence_db.db"/>
+        <include domain="sharedpref"/>
+    </device-transfer>
+</data-extraction-rules>

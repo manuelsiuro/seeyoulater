@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Link Manager</string>
+    <string name="save_link_activity_label">Save Link</string>
+    <string name="link_saved_success">Link saved successfully!</string>
+    <string name="link_saved_error">Error saving link.</string>
+    <string name="invalid_url_received">Invalid URL received.</string>
+    <string name="main_screen_title">Saved Links</string>
+    <string name="settings_screen_title">Settings</string>
+    <string name="empty_list_message">Share links here to save them!</string>
+    <string name="delete_link_confirmation_title">Delete Link?</string>
+    <string name="delete_link_confirmation_message">Are you sure you want to delete this link?</string>
+    <string name="delete_button">Delete</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="undo_button">Undo</string>
+    <string name="link_deleted_message">Link deleted</string>
+    <string name="clear_all_links_title">Clear All Links?</string>
+    <string name="clear_all_links_message">This will permanently delete all your saved links. This action cannot be undone.</string>
+    <string name="clear_button">Clear All</string>
+    <string name="settings_clear_all_links">Clear All Saved Links</string>
+    <string name="settings_enable_url_preview">Enable URL Preview Fetching</string>
+    <string name="settings_theme">App Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System Default</string>
+    <string name="search_links">Search links...</string>
+    <string name="sort_by">Sort By</string>
+    <string name="filter_all">All</string>
+    <string name="filter_starred">Starred</string>
+    <string name="sort_date_added">Date Added</string>
+    <string name="sort_last_opened">Last Opened</string>
+    <string name="cd_star_link">Star link</string>
+    <string name="cd_unstar_link">Unstar link</string>
+    <string name="cd_share_link">Share link</string>
+    <string name="cd_delete_link">Delete link</string>
+    <string name="cd_link_preview_image">Link preview image</string>
+    <string name="cd_link_favicon">Link favicon</string>
+    <string name="cd_open_settings">Open Settings</string>
+    <string name="cd_search_icon">Search</string>
+    <string name="cd_sort_icon">Sort/Filter</string>
+     <string name="cd_clear_search">Clear search</string>
+     <string name="cd_back_button">Back</string>
+     <string name="cd_link_opened_indicator">Link opened indicator</string>
+
+
+</resources>
