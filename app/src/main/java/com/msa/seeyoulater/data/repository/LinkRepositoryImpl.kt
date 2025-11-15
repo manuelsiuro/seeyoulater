@@ -161,6 +161,31 @@ class LinkRepositoryImpl(
         }
     }
 
+    // ==================== Archive Operations ====================
+
+    override suspend fun archiveLink(linkId: Long) {
+        linkDao.setArchiveStatus(linkId, true, System.currentTimeMillis())
+    }
+
+    override suspend fun unarchiveLink(linkId: Long) {
+        linkDao.setArchiveStatus(linkId, false, null)
+    }
+
+    override suspend fun toggleArchiveStatus(linkId: Long) {
+        val link = linkDao.getLinkById(linkId)
+        link?.let {
+            if (it.isArchived) {
+                unarchiveLink(linkId)
+            } else {
+                archiveLink(linkId)
+            }
+        }
+    }
+
+    override fun getArchivedLinks(): Flow<List<Link>> = linkDao.getArchivedLinks()
+
+    override suspend fun getArchivedLinksCount(): Int = linkDao.getArchivedLinksCount()
+
     // ==================== Tag Operations ====================
 
     override fun getAllTags(): Flow<List<Tag>> = tagDao.getAllTags()

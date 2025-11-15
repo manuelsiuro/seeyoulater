@@ -250,6 +250,18 @@ fun MainScreen(
                             )
                         }
                     )
+                    FilterChip(
+                        selected = state.filterOption == FilterOption.ARCHIVED,
+                        onClick = { viewModel.onFilterChanged(FilterOption.ARCHIVED) },
+                        label = { Text("Archived") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Archive,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    )
                 }
 
                 // Tag and Collection filters (scrollable)
@@ -478,6 +490,9 @@ fun MainScreen(
             },
             onToggleStar = {
                 viewModel.toggleStar(link.id)
+            },
+            onToggleArchive = {
+                viewModel.toggleArchive(link.id)
             },
             onDeleteLink = {
                 viewModel.deleteLink(link)

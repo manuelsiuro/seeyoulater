@@ -24,5 +24,9 @@ data class Link(
 
     // Notes & Annotations
     var notes: String? = null, // User's personal notes about the link
-    var notesLastModified: Long? = null // When notes were last modified
+    var notesLastModified: Long? = null, // When notes were last modified
+
+    // Archive status
+    var isArchived: Boolean = false, // Whether the link is archived
+    var archivedTimestamp: Long? = null // When the link was archived
 )

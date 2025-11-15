@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class SortOption { DATE_ADDED, LAST_OPENED }
-enum class FilterOption { ALL, STARRED }
+enum class FilterOption { ALL, STARRED, ARCHIVED }
 
 data class MainScreenState(
     val links: List<Link> = emptyList(),
@@ -130,7 +130,7 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
                 }
             }
             else -> {
-                // Standard filter (ALL or STARRED)
+                // Standard filter (ALL, STARRED, or ARCHIVED)
                 when (filters.filter) {
                     FilterOption.ALL -> when (filters.sort) {
                         SortOption.DATE_ADDED -> repository.getAllLinks()
@@ -140,6 +140,7 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
                         SortOption.DATE_ADDED -> repository.getStarredLinks()
                         SortOption.LAST_OPENED -> repository.getStarredLinksSortedByLastOpened()
                     }
+                    FilterOption.ARCHIVED -> repository.getArchivedLinks()
                 }
             }
         }
@@ -214,6 +215,17 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
             } catch (e: Exception) {
                  Log.e("MainViewModel", "Error toggling star for $linkId", e)
                 // Handle error (e.g., show a Snackbar)
+            }
+        }
+    }
+
+    fun toggleArchive(linkId: Long) {
+        viewModelScope.launch {
+            try {
+                repository.toggleArchiveStatus(linkId)
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error toggling archive for $linkId", e)
+                _state.update { it.copy(error = "Failed to archive/unarchive link.") }
             }
         }
     }

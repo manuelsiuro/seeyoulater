@@ -22,17 +22,20 @@ interface LinkDao {
     @Query("DELETE FROM links")
     suspend fun deleteAllLinks()
 
-    @Query("SELECT * FROM links ORDER BY addedTimestamp DESC")
+    @Query("SELECT * FROM links WHERE isArchived = 0 ORDER BY addedTimestamp DESC")
     fun getAllLinks(): Flow<List<Link>>
 
-    @Query("SELECT * FROM links WHERE isStarred = 1 ORDER BY addedTimestamp DESC")
+    @Query("SELECT * FROM links WHERE isStarred = 1 AND isArchived = 0 ORDER BY addedTimestamp DESC")
     fun getStarredLinks(): Flow<List<Link>>
 
-    @Query("SELECT * FROM links ORDER BY lastOpenedTimestamp")
+    @Query("SELECT * FROM links WHERE isArchived = 0 ORDER BY lastOpenedTimestamp")
     fun getAllLinksSortedByLastOpened(): Flow<List<Link>>
 
-     @Query("SELECT * FROM links WHERE isStarred = 1 ORDER BY lastOpenedTimestamp")
+     @Query("SELECT * FROM links WHERE isStarred = 1 AND isArchived = 0 ORDER BY lastOpenedTimestamp")
     fun getStarredLinksSortedByLastOpened(): Flow<List<Link>>
+
+    @Query("SELECT * FROM links WHERE isArchived = 1 ORDER BY archivedTimestamp DESC")
+    fun getArchivedLinks(): Flow<List<Link>>
 
     @Query("SELECT * FROM links WHERE id = :linkId")
     suspend fun getLinkById(linkId: Long): Link?
@@ -42,6 +45,11 @@ interface LinkDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM links WHERE url = :url)")
     suspend fun isUrlSaved(url: String): Boolean
+
+    // ==================== Archive Operations ====================
+
+    @Query("UPDATE links SET isArchived = :isArchived, archivedTimestamp = :timestamp WHERE id = :linkId")
+    suspend fun setArchiveStatus(linkId: Long, isArchived: Boolean, timestamp: Long?)
 
     // ==================== Statistics Queries ====================
 
@@ -59,4 +67,7 @@ interface LinkDao {
 
     @Query("SELECT COUNT(*) FROM links WHERE notes IS NOT NULL")
     suspend fun getLinksWithNotesCount(): Int
+
+    @Query("SELECT COUNT(*) FROM links WHERE isArchived = 1")
+    suspend fun getArchivedLinksCount(): Int
 }

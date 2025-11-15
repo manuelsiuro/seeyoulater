@@ -31,6 +31,7 @@ fun LinkActionBottomSheet(
     onShareLink: () -> Unit,
     onToggleRead: () -> Unit,
     onToggleStar: () -> Unit,
+    onToggleArchive: () -> Unit,
     onDeleteLink: () -> Unit
 ) {
     ModalBottomSheet(
@@ -139,6 +140,16 @@ fun LinkActionBottomSheet(
                 subtitle = "Share via other apps",
                 onClick = {
                     onShareLink()
+                    onDismiss()
+                }
+            )
+
+            ActionItem(
+                icon = if (link.isArchived) Icons.Default.Unarchive else Icons.Default.Archive,
+                title = if (link.isArchived) "Unarchive" else "Archive",
+                subtitle = if (link.isArchived) "Move back to active links" else "Move to archive",
+                onClick = {
+                    onToggleArchive()
                     onDismiss()
                 }
             )

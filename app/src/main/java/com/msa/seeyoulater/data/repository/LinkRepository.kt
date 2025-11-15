@@ -22,6 +22,13 @@ interface LinkRepository {
     suspend fun deleteAllLinks()
     suspend fun fetchAndUpdateLinkPreview(linkId: Long)
 
+    // ==================== Archive Operations ====================
+    suspend fun archiveLink(linkId: Long)
+    suspend fun unarchiveLink(linkId: Long)
+    suspend fun toggleArchiveStatus(linkId: Long)
+    fun getArchivedLinks(): Flow<List<Link>>
+    suspend fun getArchivedLinksCount(): Int
+
     // ==================== Tag Operations ====================
     fun getAllTags(): Flow<List<Tag>>
     fun getTagsByUsage(): Flow<List<Tag>>
