@@ -3,6 +3,7 @@ package com.msa.seeyoulater.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msa.seeyoulater.data.export.ExportManager
+import com.msa.seeyoulater.data.preferences.AppPreferencesRepository
 import com.msa.seeyoulater.data.preferences.ColorScheme
 import com.msa.seeyoulater.data.preferences.ThemeMode
 import com.msa.seeyoulater.data.preferences.ThemePreferencesRepository
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val repository: LinkRepository,
-    private val themePreferencesRepository: ThemePreferencesRepository
+    private val themePreferencesRepository: ThemePreferencesRepository,
+    private val appPreferencesRepository: AppPreferencesRepository
 ) : ViewModel() {
 
     /**
@@ -29,6 +31,29 @@ class SettingsViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ThemeSettings() // Default settings
     )
+
+    /**
+     * URL preview enabled state as StateFlow
+     */
+    val urlPreviewEnabled: StateFlow<Boolean> = appPreferencesRepository.urlPreviewEnabled.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true // Default: enabled
+    )
+
+    /**
+     * Update URL preview enabled state
+     */
+    fun setUrlPreviewEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                appPreferencesRepository.setUrlPreviewEnabled(enabled)
+            } catch (e: Exception) {
+                // Handle error
+                e.printStackTrace()
+            }
+        }
+    }
 
     /**
      * Update theme mode (Light/Dark/System)

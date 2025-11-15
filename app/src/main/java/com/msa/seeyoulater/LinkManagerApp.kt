@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.msa.seeyoulater.data.local.database.LinkDatabase
+import com.msa.seeyoulater.data.preferences.AppPreferencesRepository
 import com.msa.seeyoulater.data.preferences.ThemePreferencesRepository
 import com.msa.seeyoulater.data.repository.LinkRepository
 import com.msa.seeyoulater.data.repository.LinkRepositoryImpl
@@ -41,6 +42,11 @@ class LinkManagerApp : Application() {
         ThemePreferencesRepository(this)
     }
 
+    // App preferences repository
+    val appPreferencesRepository: AppPreferencesRepository by lazy {
+        AppPreferencesRepository(this)
+    }
+
      // Simple ViewModel Factory (replace with Hilt/Dagger in a real app)
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val viewModelFactory: ViewModelProvider.Factory by lazy {
@@ -51,7 +57,7 @@ class LinkManagerApp : Application() {
                         MainViewModel(repository) as T
                     }
                      modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
-                        SettingsViewModel(repository, themePreferencesRepository) as T
+                        SettingsViewModel(repository, themePreferencesRepository, appPreferencesRepository) as T
                     }
                     modelClass.isAssignableFrom(CollectionsViewModel::class.java) -> {
                         CollectionsViewModel(repository) as T

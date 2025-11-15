@@ -49,6 +49,9 @@ fun SettingsScreen(
     // Collect theme settings from ViewModel
     val themeSettings by viewModel.themeSettings.collectAsState()
 
+    // Collect URL preview enabled state from ViewModel
+    val urlPreviewEnabled by viewModel.urlPreviewEnabled.collectAsState()
+
     // Create ExportManager
     val exportManager = remember {
         ExportManager(
@@ -58,11 +61,6 @@ fun SettingsScreen(
             collectionDao = application.database.collectionDao()
         )
     }
-
-    // Example state holders for settings (replace with actual persisted state later)
-    var urlPreviewEnabled by remember { mutableStateOf(true) }
-     // In a real app, load/save these from DataStore or SharedPreferences via ViewModel
-    // val urlPreviewEnabled by viewModel.previewEnabled.collectAsState()
 
     // Snackbar for export messages
     val snackbarHostState = remember { SnackbarHostState() }
@@ -142,12 +140,12 @@ fun SettingsScreen(
              SettingItem(
                 icon = Icons.Default.Preview,
                 title = stringResource(R.string.settings_enable_url_preview),
-                description = "Automatically fetch title, description, and images for saved links.", // Optional description
-                onClick = { urlPreviewEnabled = !urlPreviewEnabled /* TODO: Persist change via ViewModel */ }
+                description = "Automatically fetch title, description, and images for saved links.",
+                onClick = { viewModel.setUrlPreviewEnabled(!urlPreviewEnabled) }
             ) {
                 Switch(
                     checked = urlPreviewEnabled,
-                    onCheckedChange = { isChecked -> urlPreviewEnabled = isChecked /* TODO: Persist */ }
+                    onCheckedChange = { isChecked -> viewModel.setUrlPreviewEnabled(isChecked) }
                 )
             }
 
