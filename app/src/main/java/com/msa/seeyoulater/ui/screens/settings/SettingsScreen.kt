@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Preview // Example icon for preview setting
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ fun SettingsScreen(
 
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showThemeSelectionDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
     var exportMessage by remember { mutableStateOf<String?>(null) }
 
     // Collect theme settings from ViewModel
@@ -112,6 +114,13 @@ fun SettingsScreen(
                 onDismiss = { showThemeSelectionDialog = false }
             )
         }
+    }
+
+    // About dialog
+    if (showAboutDialog) {
+        AboutDialog(
+            onDismiss = { showAboutDialog = false }
+        )
     }
 
     Scaffold(
@@ -262,9 +271,9 @@ fun SettingsScreen(
              Divider(modifier = Modifier.padding(vertical = 8.dp))
              SettingItem(
                  icon = Icons.Default.Info,
-                 title = "About Link Manager", // Replace with actual App Info
-                 description = "Version 1.0", // Replace with dynamic version name
-                 onClick = { /* TODO: Navigate to an About screen or show info dialog */ }
+                 title = "About See You Later",
+                 description = "Version 1.0.1 • View app information",
+                 onClick = { showAboutDialog = true }
              )
              // Add links for Privacy Policy, Licenses etc. here
 
@@ -312,4 +321,54 @@ fun SettingItem(
             trailingContent()
         }
     }
+}
+
+@Composable
+fun AboutDialog(
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(Icons.Default.Info, contentDescription = null)
+        },
+        title = {
+            Text("About See You Later")
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Version 1.0.1",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "A powerful bookmark manager for Android that helps you save, organize, and manage your links efficiently.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Features:",
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = "• Save and organize bookmarks\n" +
+                            "• Collections and tags support\n" +
+                            "• Link health monitoring\n" +
+                            "• Export to HTML/JSON\n" +
+                            "• Customizable themes\n" +
+                            "• Statistics and analytics",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
