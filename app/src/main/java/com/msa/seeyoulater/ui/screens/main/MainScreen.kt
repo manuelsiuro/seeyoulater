@@ -93,6 +93,10 @@ fun MainScreen(
                         IconButton(onClick = { viewModel.bulkToggleStarSelected() }) {
                             Icon(Icons.Default.Star, "Toggle star for selected")
                         }
+                        // Archive
+                        IconButton(onClick = { viewModel.bulkArchiveSelected() }) {
+                            Icon(Icons.Default.Archive, "Archive selected")
+                        }
                         // Delete
                         IconButton(onClick = { viewModel.bulkDeleteSelected() }) {
                             Icon(

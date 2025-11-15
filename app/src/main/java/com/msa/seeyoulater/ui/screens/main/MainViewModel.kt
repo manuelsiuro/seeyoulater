@@ -385,4 +385,21 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
             }
         }
     }
+
+    fun bulkArchiveSelected() {
+        val selectedIds = _state.value.selectedLinkIds
+        if (selectedIds.isEmpty()) return
+
+        viewModelScope.launch {
+            try {
+                selectedIds.forEach { linkId ->
+                    repository.archiveLink(linkId)
+                }
+                exitSelectionMode()
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error bulk archiving links", e)
+                _state.update { it.copy(error = "Failed to archive selected links.") }
+            }
+        }
+    }
 }
