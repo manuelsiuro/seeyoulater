@@ -68,6 +68,9 @@ fun MainScreen(
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (state.isSelectionMode) {

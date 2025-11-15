@@ -28,6 +28,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {

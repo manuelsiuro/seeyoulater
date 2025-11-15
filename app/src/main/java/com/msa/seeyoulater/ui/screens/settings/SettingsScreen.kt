@@ -56,6 +56,9 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_screen_title)) },
