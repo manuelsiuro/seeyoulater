@@ -70,4 +70,9 @@ interface LinkRepository {
     suspend fun getLinksWithNotesCount(): Int
     suspend fun getTotalTagsCount(): Int
     suspend fun getTotalCollectionsCount(): Int
+
+    // ==================== Health Check Operations ====================
+    suspend fun checkLinkHealth(linkId: Long)
+    suspend fun checkAllLinksHealth()
+    suspend fun getBrokenLinks(): List<Link>
 }

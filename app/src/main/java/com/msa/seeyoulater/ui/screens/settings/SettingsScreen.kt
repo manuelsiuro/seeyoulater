@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Preview // Example icon for preview setting
@@ -178,6 +179,22 @@ fun SettingsScreen(
                  title = "Statistics",
                  description = "View your bookmarks insights and analytics",
                  onClick = onNavigateToStatistics
+             )
+
+             Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+             // --- Check Link Health ---
+             SettingItem(
+                 icon = Icons.Default.HealthAndSafety,
+                 title = "Check Link Health",
+                 description = "Verify all links are still accessible",
+                 onClick = {
+                     scope.launch {
+                         exportMessage = "Checking all links... This may take a while"
+                         viewModel.checkAllLinksHealth()
+                         exportMessage = "Health check completed"
+                     }
+                 }
              )
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))

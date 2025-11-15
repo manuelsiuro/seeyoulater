@@ -2,6 +2,7 @@ package com.msa.seeyoulater.data.repository
 
 import android.util.Log
 import android.webkit.URLUtil
+import com.msa.seeyoulater.data.health.LinkHealthChecker
 import com.msa.seeyoulater.data.local.dao.LinkDao
 import com.msa.seeyoulater.data.local.dao.TagDao
 import com.msa.seeyoulater.data.local.dao.CollectionDao
@@ -11,6 +12,7 @@ import com.msa.seeyoulater.data.local.entity.Collection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -326,4 +328,34 @@ class LinkRepositoryImpl(
     override suspend fun getTotalTagsCount(): Int = tagDao.getTotalTagsCount()
 
     override suspend fun getTotalCollectionsCount(): Int = collectionDao.getTotalCollectionsCount()
+
+    // ==================== Health Check Operations ====================
+
+    override suspend fun checkLinkHealth(linkId: Long) {
+        val link = linkDao.getLinkById(linkId) ?: return
+
+        val result = LinkHealthChecker.checkLink(link.url)
+
+        link.healthStatus = result.status.name
+        link.lastHealthCheck = System.currentTimeMillis()
+        link.healthStatusCode = result.statusCode
+
+        linkDao.updateLink(link)
+        Log.d("LinkRepository", "Health check completed for link $linkId: ${result.status}")
+    }
+
+    override suspend fun checkAllLinksHealth() {
+        val links = linkDao.getAllLinks().first()
+
+        links.forEach { link ->
+            checkLinkHealth(link.id)
+        }
+    }
+
+    override suspend fun getBrokenLinks(): List<Link> {
+        val links = linkDao.getAllLinks().first()
+        return links.filter { link ->
+            link.healthStatus in listOf("CLIENT_ERROR", "SERVER_ERROR", "UNREACHABLE")
+        }
+    }
 }

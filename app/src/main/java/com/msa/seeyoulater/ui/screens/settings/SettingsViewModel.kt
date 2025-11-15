@@ -114,4 +114,11 @@ class SettingsViewModel(
     suspend fun exportToJson(exportManager: ExportManager): String? {
         return exportManager.exportToFile()
     }
+
+    /**
+     * Check health of all links
+     */
+    suspend fun checkAllLinksHealth() {
+        repository.checkAllLinksHealth()
+    }
 }

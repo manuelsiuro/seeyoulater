@@ -28,5 +28,10 @@ data class Link(
 
     // Archive status
     var isArchived: Boolean = false, // Whether the link is archived
-    var archivedTimestamp: Long? = null // When the link was archived
+    var archivedTimestamp: Long? = null, // When the link was archived
+
+    // Health check status
+    var healthStatus: String? = null, // HEALTHY, REDIRECT, CLIENT_ERROR, SERVER_ERROR, UNREACHABLE, UNKNOWN
+    var lastHealthCheck: Long? = null, // When the link was last checked
+    var healthStatusCode: Int? = null // HTTP status code from last check
 )
