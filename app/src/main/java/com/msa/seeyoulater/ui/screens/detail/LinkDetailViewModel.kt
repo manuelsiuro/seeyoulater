@@ -118,6 +118,19 @@ class LinkDetailViewModel(
         }
     }
 
+    fun updateNotes(newNotes: String) {
+        _state.update { currentState ->
+            currentState.link?.let { link ->
+                currentState.copy(
+                    link = link.copy(
+                        notes = newNotes.ifBlank { null },
+                        notesLastModified = if (newNotes.isNotBlank()) System.currentTimeMillis() else null
+                    )
+                )
+            } ?: currentState
+        }
+    }
+
     fun saveChanges(onSaveComplete: () -> Unit) {
         val currentLink = _state.value.link ?: return
 

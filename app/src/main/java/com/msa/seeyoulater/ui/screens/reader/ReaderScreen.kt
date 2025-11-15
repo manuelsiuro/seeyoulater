@@ -179,6 +179,7 @@ private fun ReaderContent(
                 update = { webView ->
                     val htmlContent = createStyledHtml(
                         content = link.savedContent!!,
+                        notes = link.notes,
                         fontSize = fontSize,
                         backgroundColor = backgroundColor,
                         textColor = textColor
@@ -267,6 +268,7 @@ private fun ReaderContent(
  */
 private fun createStyledHtml(
     content: String,
+    notes: String?,
     fontSize: Int,
     backgroundColor: Int,
     textColor: Int
@@ -348,9 +350,34 @@ private fun createStyledHtml(
                     border-top: 1px solid rgba(127, 127, 127, 0.2);
                     margin: 24px 0;
                 }
+                .notes-section {
+                    background-color: rgba(255, 193, 7, 0.1);
+                    border-left: 4px solid #FFC107;
+                    padding: 16px;
+                    margin-bottom: 24px;
+                    border-radius: 4px;
+                }
+                .notes-header {
+                    font-weight: 600;
+                    font-size: ${fontSize}px;
+                    margin-bottom: 12px;
+                    color: #F57C00;
+                }
+                .notes-content {
+                    font-size: ${fontSize - 1}px;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                }
             </style>
         </head>
         <body>
+            ${if (!notes.isNullOrBlank()) """
+                <div class="notes-section">
+                    <div class="notes-header">📝 Your Notes</div>
+                    <div class="notes-content">$notes</div>
+                </div>
+            """ else ""}
             $content
         </body>
         </html>

@@ -249,6 +249,7 @@ fun LinkDetailScreen(
                     allCollections = state.allCollections,
                     onTitleChanged = { viewModel.updateTitle(it) },
                     onDescriptionChanged = { viewModel.updateDescription(it) },
+                    onNotesChanged = { viewModel.updateNotes(it) },
                     onTagsChanged = { viewModel.updateTags(it) },
                     onCollectionsChanged = { viewModel.updateCollections(it) },
                     modifier = Modifier.padding(paddingValues)
@@ -267,6 +268,7 @@ private fun LinkDetailContent(
     allCollections: List<Collection>,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    onNotesChanged: (String) -> Unit,
     onTagsChanged: (List<Tag>) -> Unit,
     onCollectionsChanged: (List<Collection>) -> Unit,
     modifier: Modifier = Modifier
@@ -360,6 +362,35 @@ private fun LinkDetailContent(
             singleLine = false,
             maxLines = 5
         )
+
+        // Personal Notes
+        OutlinedTextField(
+            value = link.notes ?: "",
+            onValueChange = onNotesChanged,
+            label = { Text("Personal Notes") },
+            placeholder = { Text("Add your thoughts, ideas, or reminders (optional)") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            singleLine = false,
+            maxLines = 6,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Note,
+                    contentDescription = "Notes"
+                )
+            }
+        )
+
+        // Show last modified timestamp for notes if available
+        if (link.notesLastModified != null) {
+            Text(
+                text = "Notes last edited: ${formatTimestamp(link.notesLastModified!!)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
 
         HorizontalDivider()
 

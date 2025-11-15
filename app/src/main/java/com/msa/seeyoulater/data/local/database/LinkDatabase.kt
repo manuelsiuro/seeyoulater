@@ -23,7 +23,7 @@ import com.msa.seeyoulater.data.local.entity.LinkCollection
         Collection::class,
         LinkCollection::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class LinkDatabase : RoomDatabase() {
@@ -35,6 +35,17 @@ abstract class LinkDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: LinkDatabase? = null
+
+        /**
+         * Migration from version 3 to version 4
+         * Adds notes fields to links table
+         */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE links ADD COLUMN notes TEXT")
+                db.execSQL("ALTER TABLE links ADD COLUMN notesLastModified INTEGER")
+            }
+        }
 
         /**
          * Migration from version 2 to version 3
@@ -131,7 +142,7 @@ abstract class LinkDatabase : RoomDatabase() {
                     LinkDatabase::class.java,
                     "link_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance

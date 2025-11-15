@@ -20,5 +20,9 @@ data class Link(
     var savedContent: String? = null, // Full article content in HTML
     var contentSavedTimestamp: Long? = null, // When content was saved
     var readingProgress: Float = 0f, // Reading progress (0.0 to 1.0)
-    var estimatedReadingTime: Int? = null // Estimated reading time in minutes
+    var estimatedReadingTime: Int? = null, // Estimated reading time in minutes
+
+    // Notes & Annotations
+    var notes: String? = null, // User's personal notes about the link
+    var notesLastModified: Long? = null // When notes were last modified
 )
