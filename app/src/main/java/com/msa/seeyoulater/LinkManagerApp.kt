@@ -24,7 +24,14 @@ class LinkManagerApp : Application() {
     val database: LinkDatabase by lazy { LinkDatabase.getDatabase(this) }
 
     // Repository instance (lazy initialization, depends on database and scope)
-    val repository: LinkRepository by lazy { LinkRepositoryImpl(database.linkDao(), applicationScope) }
+    val repository: LinkRepository by lazy {
+        LinkRepositoryImpl(
+            linkDao = database.linkDao(),
+            tagDao = database.tagDao(),
+            collectionDao = database.collectionDao(),
+            externalScope = applicationScope
+        )
+    }
 
     // Theme preferences repository
     val themePreferencesRepository: ThemePreferencesRepository by lazy {

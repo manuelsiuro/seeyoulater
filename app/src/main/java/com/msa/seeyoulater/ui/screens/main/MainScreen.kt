@@ -3,9 +3,11 @@ package com.msa.seeyoulater.ui.screens.main
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -212,36 +214,120 @@ fun MainScreen(
                 .padding(paddingValues)
         ) {
             // Filter Chips
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(vertical = 8.dp)
             ) {
-                FilterChip(
-                    selected = state.filterOption == FilterOption.ALL,
-                    onClick = { viewModel.onFilterChanged(FilterOption.ALL) },
-                    label = { Text("All Links") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Link,
-                            contentDescription = null,
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
+                // Standard filters (All/Starred)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = state.filterOption == FilterOption.ALL,
+                        onClick = { viewModel.onFilterChanged(FilterOption.ALL) },
+                        label = { Text("All Links") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Link,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    )
+                    FilterChip(
+                        selected = state.filterOption == FilterOption.STARRED,
+                        onClick = { viewModel.onFilterChanged(FilterOption.STARRED) },
+                        label = { Text("Starred") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    )
+                }
+
+                // Tag and Collection filters (scrollable)
+                if (state.allTags.isNotEmpty() || state.allCollections.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Tag filters
+                        state.allTags.forEach { tag ->
+                            FilterChip(
+                                selected = state.selectedTagFilter?.id == tag.id,
+                                onClick = {
+                                    if (state.selectedTagFilter?.id == tag.id) {
+                                        viewModel.onTagFilterSelected(null)
+                                    } else {
+                                        viewModel.onTagFilterSelected(tag)
+                                    }
+                                },
+                                label = { Text(tag.name) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.LocalOffer,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            )
+                        }
+
+                        // Collection filters
+                        state.allCollections.forEach { collection ->
+                            FilterChip(
+                                selected = state.selectedCollectionFilter?.id == collection.id,
+                                onClick = {
+                                    if (state.selectedCollectionFilter?.id == collection.id) {
+                                        viewModel.onCollectionFilterSelected(null)
+                                    } else {
+                                        viewModel.onCollectionFilterSelected(collection)
+                                    }
+                                },
+                                label = { Text(collection.name) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Folder,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize)
+                                    )
+                                }
+                            )
+                        }
                     }
-                )
-                FilterChip(
-                    selected = state.filterOption == FilterOption.STARRED,
-                    onClick = { viewModel.onFilterChanged(FilterOption.STARRED) },
-                    label = { Text("Starred") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                }
+
+                // Active filter indicator
+                if (state.selectedTagFilter != null || state.selectedCollectionFilter != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = state.selectedTagFilter?.let { "Filtered by tag: ${it.name}" }
+                                ?: state.selectedCollectionFilter?.let { "Filtered by collection: ${it.name}" }
+                                ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
                         )
+                        TextButton(onClick = { viewModel.clearFilters() }) {
+                            Text("Clear")
+                        }
                     }
-                )
+                }
             }
 
             PullToRefreshBox(

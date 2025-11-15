@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msa.seeyoulater.data.local.entity.Link
+import com.msa.seeyoulater.data.local.entity.Tag
+import com.msa.seeyoulater.data.local.entity.Collection
 import com.msa.seeyoulater.data.repository.LinkRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -22,7 +24,11 @@ data class MainScreenState(
     val sortOption: SortOption = SortOption.DATE_ADDED,
     val filterOption: FilterOption = FilterOption.ALL,
     val isSelectionMode: Boolean = false,
-    val selectedLinkIds: Set<Long> = emptySet()
+    val selectedLinkIds: Set<Long> = emptySet(),
+    val selectedTagFilter: Tag? = null,
+    val selectedCollectionFilter: Collection? = null,
+    val allTags: List<Tag> = emptyList(),
+    val allCollections: List<Collection> = emptyList()
 )
 
 @FlowPreview
@@ -39,23 +45,45 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
     private val _filterOption = MutableStateFlow(FilterOption.ALL)
     val filterOption: StateFlow<FilterOption> = _filterOption.asStateFlow()
 
+    private val _selectedTagFilter = MutableStateFlow<Tag?>(null)
+    private val _selectedCollectionFilter = MutableStateFlow<Collection?>(null)
 
     init {
         observeLinks()
+        observeAllTags()
+        observeAllCollections()
+    }
+
+    private fun observeAllTags() {
+        viewModelScope.launch {
+            repository.getAllTags().collect { tags ->
+                _state.update { it.copy(allTags = tags) }
+            }
+        }
+    }
+
+    private fun observeAllCollections() {
+        viewModelScope.launch {
+            repository.getAllCollections().collect { collections ->
+                _state.update { it.copy(allCollections = collections) }
+            }
+        }
     }
 
     private fun observeLinks() {
         viewModelScope.launch {
-            // Combine flows for search, sort, and filter
+            // Combine flows for search, sort, filter, tag filter, and collection filter
              combine(
                 _state.map { it.searchQuery }.debounce(300), // Apply debounce to search query from state
                 _sortOption,
-                _filterOption
-            ) { query, sort, filter ->
-                 Triple(query, sort, filter)
+                _filterOption,
+                _selectedTagFilter,
+                _selectedCollectionFilter
+            ) { query, sort, filter, tagFilter, collectionFilter ->
+                 CombinedFilters(query, sort, filter, tagFilter, collectionFilter)
             }
-            .flatMapLatest { (query, sort, filter) ->
-                getFilteredAndSortedLinks(query, sort, filter)
+            .flatMapLatest { filters ->
+                getFilteredAndSortedLinks(filters)
             }
             .onStart { _state.update { it.copy(isLoading = true) } }
             .catch { e ->
@@ -68,35 +96,78 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
                         links = links,
                         isLoading = false,
                         error = null,
-                        // searchQuery is already in state, no need to update it here
                         sortOption = _sortOption.value,
-                        filterOption = _filterOption.value
+                        filterOption = _filterOption.value,
+                        selectedTagFilter = _selectedTagFilter.value,
+                        selectedCollectionFilter = _selectedCollectionFilter.value
                     )
                 }
             }
         }
     }
 
-     private fun getFilteredAndSortedLinks(query: String, sort: SortOption, filter: FilterOption): Flow<List<Link>> {
-        val baseFlow: Flow<List<Link>> = when (filter) {
-            FilterOption.ALL -> when (sort) {
-                SortOption.DATE_ADDED -> repository.getAllLinks()
-                SortOption.LAST_OPENED -> repository.getAllLinksSortedByLastOpened()
+    private data class CombinedFilters(
+        val query: String,
+        val sort: SortOption,
+        val filter: FilterOption,
+        val tagFilter: Tag?,
+        val collectionFilter: Collection?
+    )
+
+     private fun getFilteredAndSortedLinks(filters: CombinedFilters): Flow<List<Link>> {
+        // First, get the base flow based on collection/tag filter or standard filter
+        val baseFlow: Flow<List<Link>> = when {
+            filters.collectionFilter != null -> {
+                // Filter by collection
+                repository.getLinksInCollection(filters.collectionFilter.id)
             }
-            FilterOption.STARRED -> when (sort) {
-                SortOption.DATE_ADDED -> repository.getStarredLinks()
-                 SortOption.LAST_OPENED -> repository.getStarredLinksSortedByLastOpened()
+            filters.tagFilter != null -> {
+                // Filter by tag - need to get link IDs first, then fetch links
+                repository.getLinkIdsForTag(filters.tagFilter.id).flatMapLatest { linkIds ->
+                    repository.getAllLinks().map { allLinks ->
+                        allLinks.filter { link -> linkIds.contains(link.id) }
+                    }
+                }
+            }
+            else -> {
+                // Standard filter (ALL or STARRED)
+                when (filters.filter) {
+                    FilterOption.ALL -> when (filters.sort) {
+                        SortOption.DATE_ADDED -> repository.getAllLinks()
+                        SortOption.LAST_OPENED -> repository.getAllLinksSortedByLastOpened()
+                    }
+                    FilterOption.STARRED -> when (filters.sort) {
+                        SortOption.DATE_ADDED -> repository.getStarredLinks()
+                        SortOption.LAST_OPENED -> repository.getStarredLinksSortedByLastOpened()
+                    }
+                }
             }
         }
 
         return baseFlow.map { links ->
-            if (query.isBlank()) {
-                links // No search query, return all from base flow
+            var filteredLinks = links
+
+            // Apply starred filter if tag/collection filter is active
+            if ((filters.tagFilter != null || filters.collectionFilter != null) && filters.filter == FilterOption.STARRED) {
+                filteredLinks = filteredLinks.filter { it.isStarred }
+            }
+
+            // Apply sort if tag/collection filter is active
+            if (filters.tagFilter != null || filters.collectionFilter != null) {
+                filteredLinks = when (filters.sort) {
+                    SortOption.DATE_ADDED -> filteredLinks.sortedByDescending { it.addedTimestamp }
+                    SortOption.LAST_OPENED -> filteredLinks.sortedBy { it.lastOpenedTimestamp }
+                }
+            }
+
+            // Apply search query
+            if (filters.query.isBlank()) {
+                filteredLinks
             } else {
-                 links.filter { link ->
-                    link.url.contains(query, ignoreCase = true) ||
-                    link.title?.contains(query, ignoreCase = true) == true ||
-                    link.description?.contains(query, ignoreCase = true) == true
+                filteredLinks.filter { link ->
+                    link.url.contains(filters.query, ignoreCase = true) ||
+                    link.title?.contains(filters.query, ignoreCase = true) == true ||
+                    link.description?.contains(filters.query, ignoreCase = true) == true
                 }
             }
         }
@@ -112,6 +183,27 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
 
      fun onFilterChanged(option: FilterOption) {
         _filterOption.value = option
+    }
+
+    fun onTagFilterSelected(tag: Tag?) {
+        _selectedTagFilter.value = tag
+        // Clear collection filter when tag filter is selected
+        if (tag != null) {
+            _selectedCollectionFilter.value = null
+        }
+    }
+
+    fun onCollectionFilterSelected(collection: Collection?) {
+        _selectedCollectionFilter.value = collection
+        // Clear tag filter when collection filter is selected
+        if (collection != null) {
+            _selectedTagFilter.value = null
+        }
+    }
+
+    fun clearFilters() {
+        _selectedTagFilter.value = null
+        _selectedCollectionFilter.value = null
     }
 
 

@@ -3,7 +3,11 @@ package com.msa.seeyoulater.data.repository
 import android.util.Log
 import android.webkit.URLUtil
 import com.msa.seeyoulater.data.local.dao.LinkDao
+import com.msa.seeyoulater.data.local.dao.TagDao
+import com.msa.seeyoulater.data.local.dao.CollectionDao
 import com.msa.seeyoulater.data.local.entity.Link
+import com.msa.seeyoulater.data.local.entity.Tag
+import com.msa.seeyoulater.data.local.entity.Collection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +19,8 @@ import java.net.URL
 
 class LinkRepositoryImpl(
     private val linkDao: LinkDao,
+    private val tagDao: TagDao,
+    private val collectionDao: CollectionDao,
     private val externalScope: CoroutineScope // For long running background tasks like preview fetching
 ) : LinkRepository {
 
@@ -151,5 +157,105 @@ class LinkRepositoryImpl(
             Log.w("LinkPreview", "Could not resolve URL: $relativeUrl against base: $baseUrl")
             if (URLUtil.isValidUrl(relativeUrl)) relativeUrl else null // Fallback if it's already absolute
         }
+    }
+
+    // ==================== Tag Operations ====================
+
+    override fun getAllTags(): Flow<List<Tag>> = tagDao.getAllTags()
+
+    override fun getTagsByUsage(): Flow<List<Tag>> = tagDao.getTagsByUsage()
+
+    override fun searchTags(query: String): Flow<List<Tag>> = tagDao.searchTags(query)
+
+    override fun getTagsForLink(linkId: Long): Flow<List<Tag>> = tagDao.getTagsForLink(linkId)
+
+    override suspend fun getTagById(tagId: Long): Tag? = tagDao.getTagById(tagId)
+
+    override suspend fun createTag(name: String, color: String?): Long {
+        val tag = Tag(name = name, color = color)
+        return tagDao.insertTag(tag)
+    }
+
+    override suspend fun updateTag(tag: Tag) {
+        tagDao.updateTag(tag)
+    }
+
+    override suspend fun deleteTag(tagId: Long) {
+        tagDao.deleteTagById(tagId)
+    }
+
+    override suspend fun addTagToLink(linkId: Long, tagName: String, tagColor: String?) {
+        tagDao.addTagToLink(linkId, tagName, tagColor)
+    }
+
+    override suspend fun removeTagFromLink(linkId: Long, tagId: Long) {
+        tagDao.removeTagFromLink(linkId, tagId)
+    }
+
+    /**
+     * Replace all tags for a link with a new set of tags
+     * This is useful when editing tags in bulk
+     */
+    override suspend fun setTagsForLink(linkId: Long, tagNames: List<String>) {
+        // Get current tags for the link
+        val currentTagIds = tagDao.getTagIdsForLink(linkId)
+
+        // Remove all current tags
+        tagDao.deleteAllTagsForLink(linkId)
+
+        // Add new tags
+        tagNames.forEach { tagName ->
+            if (tagName.isNotBlank()) {
+                tagDao.addTagToLink(linkId, tagName.trim())
+            }
+        }
+    }
+
+    override fun getLinkIdsForTag(tagId: Long): Flow<List<Long>> = tagDao.getLinkIdsForTag(tagId)
+
+    // ==================== Collection Operations ====================
+
+    override fun getAllCollections(): Flow<List<Collection>> = collectionDao.getAllCollections()
+
+    override fun searchCollections(query: String): Flow<List<Collection>> = collectionDao.searchCollections(query)
+
+    override fun getCollectionsForLink(linkId: Long): Flow<List<Collection>> = collectionDao.getCollectionsForLink(linkId)
+
+    override fun getLinksInCollection(collectionId: Long): Flow<List<Link>> = collectionDao.getLinksInCollection(collectionId)
+
+    override suspend fun getCollectionById(collectionId: Long): Collection? = collectionDao.getCollectionById(collectionId)
+
+    override suspend fun createCollection(name: String, description: String?, icon: String?, color: String?): Long {
+        val collection = Collection(
+            name = name,
+            description = description,
+            icon = icon,
+            color = color
+        )
+        return collectionDao.insertCollection(collection)
+    }
+
+    override suspend fun updateCollection(collection: Collection) {
+        collectionDao.updateCollection(collection)
+    }
+
+    override suspend fun deleteCollection(collectionId: Long) {
+        collectionDao.deleteCollectionById(collectionId)
+    }
+
+    override suspend fun addLinkToCollection(linkId: Long, collectionId: Long) {
+        collectionDao.addLinkToCollection(linkId, collectionId)
+    }
+
+    override suspend fun removeLinkFromCollection(linkId: Long, collectionId: Long) {
+        collectionDao.removeLinkFromCollection(linkId, collectionId)
+    }
+
+    override suspend fun updateLinkSortOrderInCollection(linkId: Long, collectionId: Long, sortOrder: Int) {
+        collectionDao.updateLinkSortOrder(linkId, collectionId, sortOrder)
+    }
+
+    override suspend fun isLinkInCollection(linkId: Long, collectionId: Long): Boolean {
+        return collectionDao.isLinkInCollection(linkId, collectionId)
     }
 }

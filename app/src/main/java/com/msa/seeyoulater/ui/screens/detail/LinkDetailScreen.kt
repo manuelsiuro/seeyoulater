@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.msa.seeyoulater.data.local.entity.Link
+import com.msa.seeyoulater.data.local.entity.Tag
+import com.msa.seeyoulater.data.local.entity.Collection
+import com.msa.seeyoulater.ui.components.TagInput
+import com.msa.seeyoulater.ui.components.CollectionPicker
 import com.msa.seeyoulater.ui.theme.StarredColor
 import java.text.SimpleDateFormat
 import java.util.*
@@ -217,8 +221,14 @@ fun LinkDetailScreen(
             else -> {
                 LinkDetailContent(
                     link = state.link!!,
+                    tags = state.tags,
+                    collections = state.collections,
+                    allTags = state.allTags,
+                    allCollections = state.allCollections,
                     onTitleChanged = { viewModel.updateTitle(it) },
                     onDescriptionChanged = { viewModel.updateDescription(it) },
+                    onTagsChanged = { viewModel.updateTags(it) },
+                    onCollectionsChanged = { viewModel.updateCollections(it) },
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -229,8 +239,14 @@ fun LinkDetailScreen(
 @Composable
 private fun LinkDetailContent(
     link: Link,
+    tags: List<Tag>,
+    collections: List<Collection>,
+    allTags: List<Tag>,
+    allCollections: List<Collection>,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    onTagsChanged: (List<Tag>) -> Unit,
+    onCollectionsChanged: (List<Collection>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -321,6 +337,36 @@ private fun LinkDetailContent(
                 .height(120.dp),
             singleLine = false,
             maxLines = 5
+        )
+
+        HorizontalDivider()
+
+        // Tags Section
+        Text(
+            text = "Tags",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        TagInput(
+            currentTags = tags,
+            allTags = allTags,
+            onTagsChanged = onTagsChanged
+        )
+
+        HorizontalDivider()
+
+        // Collections Section
+        Text(
+            text = "Collections",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        CollectionPicker(
+            currentCollections = collections,
+            allCollections = allCollections,
+            onCollectionsChanged = onCollectionsChanged
         )
 
         HorizontalDivider()

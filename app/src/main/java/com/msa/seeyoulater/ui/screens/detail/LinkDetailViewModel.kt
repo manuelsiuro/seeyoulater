@@ -4,12 +4,18 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msa.seeyoulater.data.local.entity.Link
+import com.msa.seeyoulater.data.local.entity.Tag
+import com.msa.seeyoulater.data.local.entity.Collection
 import com.msa.seeyoulater.data.repository.LinkRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class LinkDetailState(
     val link: Link? = null,
+    val tags: List<Tag> = emptyList(),
+    val collections: List<Collection> = emptyList(),
+    val allTags: List<Tag> = emptyList(),
+    val allCollections: List<Collection> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
     val isSaving: Boolean = false,
@@ -26,6 +32,10 @@ class LinkDetailViewModel(
 
     init {
         loadLink()
+        loadTags()
+        loadCollections()
+        loadAllTags()
+        loadAllCollections()
     }
 
     private fun loadLink() {
@@ -56,6 +66,38 @@ class LinkDetailViewModel(
                         error = "Failed to load link: ${e.localizedMessage}"
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadTags() {
+        viewModelScope.launch {
+            repository.getTagsForLink(linkId).collect { tags ->
+                _state.update { it.copy(tags = tags) }
+            }
+        }
+    }
+
+    private fun loadCollections() {
+        viewModelScope.launch {
+            repository.getCollectionsForLink(linkId).collect { collections ->
+                _state.update { it.copy(collections = collections) }
+            }
+        }
+    }
+
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            repository.getAllTags().collect { allTags ->
+                _state.update { it.copy(allTags = allTags) }
+            }
+        }
+    }
+
+    private fun loadAllCollections() {
+        viewModelScope.launch {
+            repository.getAllCollections().collect { allCollections ->
+                _state.update { it.copy(allCollections = allCollections) }
             }
         }
     }
@@ -131,5 +173,75 @@ class LinkDetailViewModel(
 
     fun clearError() {
         _state.update { it.copy(error = null) }
+    }
+
+    // ==================== Tag Operations ====================
+
+    fun updateTags(newTags: List<Tag>) {
+        viewModelScope.launch {
+            try {
+                // Get current tag IDs
+                val currentTagIds = _state.value.tags.map { it.id }.toSet()
+                val newTagIds = newTags.map { it.id }.toSet()
+
+                // Tags to add (new tags without ID need to be created first)
+                newTags.forEach { tag ->
+                    if (tag.id == 0L) {
+                        // New tag - needs to be created
+                        repository.addTagToLink(linkId, tag.name, tag.color)
+                    } else if (!currentTagIds.contains(tag.id)) {
+                        // Existing tag - just add the relationship
+                        repository.addTagToLink(linkId, tag.name, tag.color)
+                    }
+                }
+
+                // Tags to remove
+                _state.value.tags.forEach { tag ->
+                    if (!newTagIds.contains(tag.id)) {
+                        repository.removeTagFromLink(linkId, tag.id)
+                    }
+                }
+
+                // State will be updated automatically through loadTags() flow
+            } catch (e: Exception) {
+                Log.e("LinkDetailViewModel", "Error updating tags", e)
+                _state.update {
+                    it.copy(error = "Failed to update tags: ${e.localizedMessage}")
+                }
+            }
+        }
+    }
+
+    // ==================== Collection Operations ====================
+
+    fun updateCollections(newCollections: List<Collection>) {
+        viewModelScope.launch {
+            try {
+                // Get current collection IDs
+                val currentCollectionIds = _state.value.collections.map { it.id }.toSet()
+                val newCollectionIds = newCollections.map { it.id }.toSet()
+
+                // Collections to add
+                newCollections.forEach { collection ->
+                    if (!currentCollectionIds.contains(collection.id)) {
+                        repository.addLinkToCollection(linkId, collection.id)
+                    }
+                }
+
+                // Collections to remove
+                _state.value.collections.forEach { collection ->
+                    if (!newCollectionIds.contains(collection.id)) {
+                        repository.removeLinkFromCollection(linkId, collection.id)
+                    }
+                }
+
+                // State will be updated automatically through loadCollections() flow
+            } catch (e: Exception) {
+                Log.e("LinkDetailViewModel", "Error updating collections", e)
+                _state.update {
+                    it.copy(error = "Failed to update collections: ${e.localizedMessage}")
+                }
+            }
+        }
     }
 }
