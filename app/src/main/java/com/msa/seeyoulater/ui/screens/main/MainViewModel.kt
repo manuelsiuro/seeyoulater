@@ -1,6 +1,7 @@
 package com.msa.seeyoulater.ui.screens.main
 
 import android.util.Log
+import android.webkit.URLUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.msa.seeyoulater.data.local.entity.Link
@@ -399,6 +400,44 @@ class MainViewModel(private val repository: LinkRepository) : ViewModel() {
             } catch (e: Exception) {
                 Log.e("MainViewModel", "Error bulk archiving links", e)
                 _state.update { it.copy(error = "Failed to archive selected links.") }
+            }
+        }
+    }
+
+    fun batchImportUrls(urlText: String) {
+        viewModelScope.launch {
+            try {
+                val urls = urlText.lines()
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() && URLUtil.isValidUrl(it) }
+                    .distinct()
+
+                var imported = 0
+                var skipped = 0
+
+                urls.forEach { url ->
+                    // Check if URL already exists
+                    val exists = repository.isUrlSaved(url)
+                    if (!exists) {
+                        repository.saveLink(url, null)
+                        imported++
+                    } else {
+                        skipped++
+                    }
+                }
+
+                val message = buildString {
+                    append("Imported $imported link${if (imported != 1) "s" else ""}")
+                    if (skipped > 0) {
+                        append(", skipped $skipped duplicate${if (skipped != 1) "s" else ""}")
+                    }
+                }
+
+                _state.update { it.copy(error = message) } // Using error field for success message
+                Log.i("MainViewModel", message)
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error batch importing URLs", e)
+                _state.update { it.copy(error = "Failed to import URLs: ${e.localizedMessage}") }
             }
         }
     }

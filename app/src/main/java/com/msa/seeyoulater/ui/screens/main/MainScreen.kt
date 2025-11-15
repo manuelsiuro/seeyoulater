@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.msa.seeyoulater.LinkManagerApp
 import com.msa.seeyoulater.R
 import com.msa.seeyoulater.data.local.entity.Link
+import com.msa.seeyoulater.ui.screens.main.components.BatchImportDialog
 import com.msa.seeyoulater.ui.screens.main.components.LinkActionBottomSheet
 import com.msa.seeyoulater.ui.screens.main.components.LinkItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,6 +48,7 @@ fun MainScreen(
     var selectedLinkForAction by remember { mutableStateOf<Link?>(null) }
     var showSearchBar by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var showBatchImportDialog by remember { mutableStateOf(false) }
     var isRefreshing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -74,6 +76,16 @@ fun MainScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (!state.isSelectionMode && !showSearchBar) {
+                FloatingActionButton(
+                    onClick = { showBatchImportDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(Icons.Default.Add, "Batch import URLs")
+                }
+            }
+        },
         topBar = {
             if (state.isSelectionMode) {
                 // Selection Mode TopAppBar
@@ -500,6 +512,16 @@ fun MainScreen(
             },
             onDeleteLink = {
                 viewModel.deleteLink(link)
+            }
+        )
+    }
+
+    // Batch Import Dialog
+    if (showBatchImportDialog) {
+        BatchImportDialog(
+            onDismiss = { showBatchImportDialog = false },
+            onImport = { urlText ->
+                viewModel.batchImportUrls(urlText)
             }
         )
     }
