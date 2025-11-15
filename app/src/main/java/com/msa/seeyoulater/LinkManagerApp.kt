@@ -11,6 +11,7 @@ import com.msa.seeyoulater.ui.screens.main.MainViewModel
 import com.msa.seeyoulater.ui.screens.settings.SettingsViewModel
 import com.msa.seeyoulater.ui.screens.collections.CollectionsViewModel
 import com.msa.seeyoulater.ui.screens.tags.TagsViewModel
+import com.msa.seeyoulater.ui.screens.statistics.StatisticsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,6 +58,9 @@ class LinkManagerApp : Application() {
                     }
                     modelClass.isAssignableFrom(TagsViewModel::class.java) -> {
                         TagsViewModel(repository) as T
+                    }
+                    modelClass.isAssignableFrom(StatisticsViewModel::class.java) -> {
+                        StatisticsViewModel(repository) as T
                     }
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }

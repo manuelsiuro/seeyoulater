@@ -285,4 +285,20 @@ class LinkRepositoryImpl(
         val link = linkDao.getLinkById(linkId)
         return link?.savedContent != null
     }
+
+    // ==================== Statistics Operations ====================
+
+    override suspend fun getTotalLinksCount(): Int = linkDao.getTotalLinksCount()
+
+    override suspend fun getStarredLinksCount(): Int = linkDao.getStarredLinksCount()
+
+    override suspend fun getOpenedLinksCount(): Int = linkDao.getOpenedLinksCount()
+
+    override suspend fun getLinksWithSavedContentCount(): Int = linkDao.getLinksWithSavedContentCount()
+
+    override suspend fun getLinksWithNotesCount(): Int = linkDao.getLinksWithNotesCount()
+
+    override suspend fun getTotalTagsCount(): Int = tagDao.getTotalTagsCount()
+
+    override suspend fun getTotalCollectionsCount(): Int = collectionDao.getTotalCollectionsCount()
 }

@@ -145,4 +145,9 @@ interface TagDao {
         val currentCount = getLinkCountForTag(tagId)
         updateTagUsageCount(tagId, currentCount)
     }
+
+    // ==================== Statistics Queries ====================
+
+    @Query("SELECT COUNT(*) FROM tags")
+    suspend fun getTotalTagsCount(): Int
 }

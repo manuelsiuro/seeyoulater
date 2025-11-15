@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
@@ -28,7 +29,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToCollections: () -> Unit = {},
-    onNavigateToTags: () -> Unit = {}
+    onNavigateToTags: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {}
 ) {
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showThemeSelectionDialog by remember { mutableStateOf(false) }
@@ -136,6 +138,16 @@ fun SettingsScreen(
                  title = "Manage Tags",
                  description = "Create and organize your tags",
                  onClick = onNavigateToTags
+             )
+
+             Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+             // --- Statistics ---
+             SettingItem(
+                 icon = Icons.Default.BarChart,
+                 title = "Statistics",
+                 description = "View your bookmarks insights and analytics",
+                 onClick = onNavigateToStatistics
              )
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))

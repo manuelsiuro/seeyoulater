@@ -20,6 +20,8 @@ import com.msa.seeyoulater.ui.screens.tags.TagsViewModel
 import com.msa.seeyoulater.ui.screens.splash.SplashScreen
 import com.msa.seeyoulater.ui.screens.reader.ReaderScreen
 import com.msa.seeyoulater.ui.screens.reader.ReaderViewModel
+import com.msa.seeyoulater.ui.screens.statistics.StatisticsScreen
+import com.msa.seeyoulater.ui.screens.statistics.StatisticsViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 
@@ -53,7 +55,8 @@ fun AppNavigation(navController: NavHostController) {
                 viewModel = settingsViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToCollections = { navController.navigate(Screen.Collections.route) },
-                onNavigateToTags = { navController.navigate(Screen.Tags.route) }
+                onNavigateToTags = { navController.navigate(Screen.Tags.route) },
+                onNavigateToStatistics = { navController.navigate(Screen.Statistics.route) }
             )
         }
         composable(Screen.Collections.route) {
@@ -67,6 +70,13 @@ fun AppNavigation(navController: NavHostController) {
             val tagsViewModel: TagsViewModel = viewModel(factory = viewModelFactory)
             TagsScreen(
                 viewModel = tagsViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Statistics.route) {
+            val statisticsViewModel: StatisticsViewModel = viewModel(factory = viewModelFactory)
+            StatisticsScreen(
+                viewModel = statisticsViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

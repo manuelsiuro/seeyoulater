@@ -54,4 +54,13 @@ interface LinkRepository {
     suspend fun saveArticleContent(linkId: Long, content: String, estimatedReadingTime: Int)
     suspend fun updateReadingProgress(linkId: Long, progress: Float)
     suspend fun hasArticleContent(linkId: Long): Boolean
+
+    // ==================== Statistics Operations ====================
+    suspend fun getTotalLinksCount(): Int
+    suspend fun getStarredLinksCount(): Int
+    suspend fun getOpenedLinksCount(): Int
+    suspend fun getLinksWithSavedContentCount(): Int
+    suspend fun getLinksWithNotesCount(): Int
+    suspend fun getTotalTagsCount(): Int
+    suspend fun getTotalCollectionsCount(): Int
 }

@@ -42,4 +42,21 @@ interface LinkDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM links WHERE url = :url)")
     suspend fun isUrlSaved(url: String): Boolean
+
+    // ==================== Statistics Queries ====================
+
+    @Query("SELECT COUNT(*) FROM links")
+    suspend fun getTotalLinksCount(): Int
+
+    @Query("SELECT COUNT(*) FROM links WHERE isStarred = 1")
+    suspend fun getStarredLinksCount(): Int
+
+    @Query("SELECT COUNT(*) FROM links WHERE isOpened = 1")
+    suspend fun getOpenedLinksCount(): Int
+
+    @Query("SELECT COUNT(*) FROM links WHERE savedContent IS NOT NULL")
+    suspend fun getLinksWithSavedContentCount(): Int
+
+    @Query("SELECT COUNT(*) FROM links WHERE notes IS NOT NULL")
+    suspend fun getLinksWithNotesCount(): Int
 }

@@ -174,4 +174,9 @@ interface CollectionDao {
     suspend fun moveLinkInCollection(linkId: Long, collectionId: Long, newSortOrder: Int) {
         updateLinkSortOrder(linkId, collectionId, newSortOrder)
     }
+
+    // ==================== Statistics Queries ====================
+
+    @Query("SELECT COUNT(*) FROM collections")
+    suspend fun getTotalCollectionsCount(): Int
 }
