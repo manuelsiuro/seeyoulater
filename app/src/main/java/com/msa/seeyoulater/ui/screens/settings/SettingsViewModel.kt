@@ -2,6 +2,7 @@ package com.msa.seeyoulater.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.msa.seeyoulater.data.export.ExportManager
 import com.msa.seeyoulater.data.preferences.ColorScheme
 import com.msa.seeyoulater.data.preferences.ThemeMode
 import com.msa.seeyoulater.data.preferences.ThemePreferencesRepository
@@ -98,5 +99,19 @@ class SettingsViewModel(
                 e.printStackTrace()
             }
         }
+    }
+
+    /**
+     * Export bookmarks to HTML format
+     */
+    suspend fun exportToHtml(exportManager: ExportManager): String? {
+        return exportManager.exportToHtml()
+    }
+
+    /**
+     * Export data to JSON format
+     */
+    suspend fun exportToJson(exportManager: ExportManager): String? {
+        return exportManager.exportToFile()
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Preview // Example icon for preview setting
@@ -16,12 +17,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color // Added import for Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.msa.seeyoulater.LinkManagerApp
 import com.msa.seeyoulater.R
+import com.msa.seeyoulater.data.export.ExportManager
 import com.msa.seeyoulater.ui.components.ThemeSelectionDialog
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,16 +37,40 @@ fun SettingsScreen(
     onNavigateToTags: () -> Unit = {},
     onNavigateToStatistics: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as LinkManagerApp
+    val scope = rememberCoroutineScope()
+
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showThemeSelectionDialog by remember { mutableStateOf(false) }
+    var exportMessage by remember { mutableStateOf<String?>(null) }
 
     // Collect theme settings from ViewModel
     val themeSettings by viewModel.themeSettings.collectAsState()
+
+    // Create ExportManager
+    val exportManager = remember {
+        ExportManager(
+            context = context,
+            linkDao = application.database.linkDao(),
+            tagDao = application.database.tagDao(),
+            collectionDao = application.database.collectionDao()
+        )
+    }
 
     // Example state holders for settings (replace with actual persisted state later)
     var urlPreviewEnabled by remember { mutableStateOf(true) }
      // In a real app, load/save these from DataStore or SharedPreferences via ViewModel
     // val urlPreviewEnabled by viewModel.previewEnabled.collectAsState()
+
+    // Snackbar for export messages
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(exportMessage) {
+        exportMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            exportMessage = null
+        }
+    }
 
 
     // Clear confirmation dialog
@@ -90,6 +119,7 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.systemBars),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_screen_title)) },
@@ -161,6 +191,44 @@ fun SettingsScreen(
              )
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // --- Export to HTML ---
+            SettingItem(
+                icon = Icons.Default.FileDownload,
+                title = "Export to HTML",
+                description = "Export bookmarks in browser-compatible format",
+                onClick = {
+                    scope.launch {
+                        val filePath = viewModel.exportToHtml(exportManager)
+                        exportMessage = if (filePath != null) {
+                            "Bookmarks exported to HTML successfully"
+                        } else {
+                            "Failed to export bookmarks"
+                        }
+                    }
+                }
+            )
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // --- Export to JSON ---
+            SettingItem(
+                icon = Icons.Default.FileDownload,
+                title = "Export to JSON",
+                description = "Export all data as backup",
+                onClick = {
+                    scope.launch {
+                        val filePath = viewModel.exportToJson(exportManager)
+                        exportMessage = if (filePath != null) {
+                            "Data exported to JSON successfully"
+                        } else {
+                            "Failed to export data"
+                        }
+                    }
+                }
+            )
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
 
 
             // --- Clear All Links ---

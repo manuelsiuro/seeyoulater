@@ -163,4 +163,47 @@ class ExportManager(
             file.name.startsWith("seeyoulater_backup_") && file.name.endsWith(".json")
         }?.sortedByDescending { it.lastModified() } ?: emptyList()
     }
+
+    /**
+     * Export all bookmarks to HTML format (Netscape Bookmark File Format)
+     * Returns the file path if successful, null otherwise
+     */
+    suspend fun exportToHtml(): String? = withContext(Dispatchers.IO) {
+        try {
+            // Collect all data
+            val links = linkDao.getAllLinks().first()
+            val tags = tagDao.getAllTags().first()
+            val collections = collectionDao.getAllCollections().first()
+            val linkTags = tagDao.getAllLinkTags()
+            val linkCollections = collectionDao.getAllLinkCollections()
+
+            // Build maps for quick lookup
+            val linkCollectionsMap = linkCollections.groupBy { it.linkId }.mapValues { entry ->
+                collections.filter { collection -> entry.value.any { it.collectionId == collection.id } }
+            }
+            val linkTagsMap = linkTags.groupBy { it.linkId }.mapValues { entry ->
+                tags.filter { tag -> entry.value.any { it.tagId == tag.id } }
+            }
+
+            // Generate HTML
+            val html = HtmlExporter.generateHtml(
+                links = links,
+                collections = collections,
+                tags = tags,
+                linkCollections = linkCollectionsMap,
+                linkTags = linkTagsMap
+            )
+
+            // Save to file
+            val fileName = "seeyoulater_bookmarks_${getTimestampString()}.html"
+            val file = File(context.getExternalFilesDir(null), fileName)
+            file.writeText(html)
+
+            Log.i(TAG, "HTML export successful: ${file.absolutePath}")
+            file.absolutePath
+        } catch (e: Exception) {
+            Log.e(TAG, "HTML export failed", e)
+            null
+        }
+    }
 }
