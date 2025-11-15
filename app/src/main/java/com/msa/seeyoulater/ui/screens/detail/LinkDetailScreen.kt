@@ -116,7 +116,7 @@ fun LinkDetailScreen(
                     IconButton(
                         onClick = {
                             state.link?.let { link ->
-                                shareLink(context, link.url)
+                                shareLink(context, link.url, link.title, link.description)
                             }
                         }
                     ) {
@@ -494,10 +494,25 @@ private fun openLinkInBrowser(context: Context, url: String) {
     }
 }
 
-private fun shareLink(context: Context, url: String) {
+private fun shareLink(context: Context, url: String, title: String? = null, description: String? = null) {
+    val shareText = buildString {
+        if (!title.isNullOrBlank()) {
+            append(title)
+            append("\n\n")
+        }
+        if (!description.isNullOrBlank()) {
+            append(description)
+            append("\n\n")
+        }
+        append(url)
+    }
+
     val sendIntent: Intent = Intent().apply {
         action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, url)
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        if (!title.isNullOrBlank()) {
+            putExtra(Intent.EXTRA_SUBJECT, title)
+        }
         type = "text/plain"
     }
     val shareIntent = Intent.createChooser(sendIntent, null)
