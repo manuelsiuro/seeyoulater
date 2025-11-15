@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Preview // Example icon for preview setting
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +26,9 @@ import com.msa.seeyoulater.ui.components.ThemeSelectionDialog
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToCollections: () -> Unit = {},
+    onNavigateToTags: () -> Unit = {}
 ) {
     var showClearConfirmationDialog by remember { mutableStateOf(false) }
     var showThemeSelectionDialog by remember { mutableStateOf(false) }
@@ -113,6 +117,26 @@ fun SettingsScreen(
                     onCheckedChange = { isChecked -> urlPreviewEnabled = isChecked /* TODO: Persist */ }
                 )
             }
+
+             Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+             // --- Collections Management ---
+             SettingItem(
+                 icon = Icons.Default.Folder,
+                 title = "Manage Collections",
+                 description = "Create and organize your collections",
+                 onClick = onNavigateToCollections
+             )
+
+             Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+             // --- Tags Management ---
+             SettingItem(
+                 icon = Icons.Default.BookmarkBorder,
+                 title = "Manage Tags",
+                 description = "Create and organize your tags",
+                 onClick = onNavigateToTags
+             )
 
              Divider(modifier = Modifier.padding(vertical = 8.dp))
 

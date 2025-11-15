@@ -9,6 +9,8 @@ import com.msa.seeyoulater.data.repository.LinkRepository
 import com.msa.seeyoulater.data.repository.LinkRepositoryImpl
 import com.msa.seeyoulater.ui.screens.main.MainViewModel
 import com.msa.seeyoulater.ui.screens.settings.SettingsViewModel
+import com.msa.seeyoulater.ui.screens.collections.CollectionsViewModel
+import com.msa.seeyoulater.ui.screens.tags.TagsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,6 +51,12 @@ class LinkManagerApp : Application() {
                     }
                      modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
                         SettingsViewModel(repository, themePreferencesRepository) as T
+                    }
+                    modelClass.isAssignableFrom(CollectionsViewModel::class.java) -> {
+                        CollectionsViewModel(repository) as T
+                    }
+                    modelClass.isAssignableFrom(TagsViewModel::class.java) -> {
+                        TagsViewModel(repository) as T
                     }
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }

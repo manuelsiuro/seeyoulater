@@ -13,6 +13,10 @@ import com.msa.seeyoulater.ui.screens.detail.LinkDetailViewModel
 import com.msa.seeyoulater.ui.screens.main.MainScreen
 import com.msa.seeyoulater.ui.screens.settings.SettingsScreen
 import com.msa.seeyoulater.ui.screens.settings.SettingsViewModel
+import com.msa.seeyoulater.ui.screens.collections.CollectionsScreen
+import com.msa.seeyoulater.ui.screens.collections.CollectionsViewModel
+import com.msa.seeyoulater.ui.screens.tags.TagsScreen
+import com.msa.seeyoulater.ui.screens.tags.TagsViewModel
 import com.msa.seeyoulater.ui.screens.splash.SplashScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -45,6 +49,22 @@ fun AppNavigation(navController: NavHostController) {
              val settingsViewModel: SettingsViewModel = viewModel(factory = viewModelFactory)
             SettingsScreen(
                 viewModel = settingsViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCollections = { navController.navigate(Screen.Collections.route) },
+                onNavigateToTags = { navController.navigate(Screen.Tags.route) }
+            )
+        }
+        composable(Screen.Collections.route) {
+            val collectionsViewModel: CollectionsViewModel = viewModel(factory = viewModelFactory)
+            CollectionsScreen(
+                viewModel = collectionsViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Tags.route) {
+            val tagsViewModel: TagsViewModel = viewModel(factory = viewModelFactory)
+            TagsScreen(
+                viewModel = tagsViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
