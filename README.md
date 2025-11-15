@@ -1,6 +1,6 @@
 # See You Later
 
-An Android link manager application that helps you save and organize links shared from other apps.
+An Android app to save links from all other apps and social networks and easily find them for later viewing.
 
 ## Features
 
