@@ -75,6 +75,9 @@ interface CollectionDao {
     @Query("DELETE FROM link_collections WHERE collectionId = :collectionId")
     suspend fun deleteAllLinksInCollection(collectionId: Long)
 
+    @Query("SELECT * FROM link_collections")
+    suspend fun getAllLinkCollections(): List<LinkCollection>
+
     /**
      * Get all collections for a specific link
      */

@@ -67,6 +67,9 @@ interface TagDao {
     @Query("DELETE FROM link_tags WHERE linkId = :linkId")
     suspend fun deleteAllTagsForLink(linkId: Long)
 
+    @Query("SELECT * FROM link_tags")
+    suspend fun getAllLinkTags(): List<LinkTag>
+
     /**
      * Get all tags for a specific link
      */
